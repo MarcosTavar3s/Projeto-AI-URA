@@ -7,12 +7,12 @@
 #define S2 27
 
 // Configurações da rede Wi-Fi
-const char* ssid = "XXXXXX";
-const char* password = "XXXXXX";
+const char* ssid = "Galaxy A711E8A";
+const char* password = "cmzv8898";
 
 // Configurações do broker MQTT
 const char* mqtt_server = "broker.emqx.io";
-const char* topic = "XXXXXX";
+const char* topic = "aiurarecebe";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -70,6 +70,11 @@ void callback(char* topic, byte* message, unsigned int length) {
     movimento(255,0,0,255);
     Serial.println("Carro para esquerda");    
   }
+  if(msg.equals("P")){
+    movimento(0,0,0,0);
+    Serial.println("Carro parado")
+  }
+
   Serial.println();
 }
 
