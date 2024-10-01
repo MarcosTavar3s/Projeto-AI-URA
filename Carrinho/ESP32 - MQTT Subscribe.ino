@@ -7,12 +7,12 @@
 #define S2 27
 
 // Configurações da rede Wi-Fi
-const char* ssid = "Galaxy A711E8A";
-const char* password = "cmzv8898";
+const char* ssid = "XXXXXXXXXXXXXXXXXX";
+const char* password = "XXXXXXXXXXXXXXXXXX";
 
 // Configurações do broker MQTT
 const char* mqtt_server = "broker.emqx.io";
-const char* topic = "aiurarecebe";
+const char* topic = "XXXXXXXXXXXXXXXXXX";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
