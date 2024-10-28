@@ -4,7 +4,6 @@ import cv2
 import numpy as np
 from threading import Thread
 import torch
-import pandas as pd
 import paho.mqtt.client as mqtt
 
 # Caminho do modelo
@@ -63,38 +62,44 @@ def idYolo(img):
     bwRect1 = int(0.3*width)
     ewRect1 = int(0.7*width)
     
-    processed_img = result[0].plot()
+    res = result[0].boxes    
+    if len(res.xywh):
     
-    if len(result[0].boxes.xywh):
-    
-        boxesxywh = result[0].boxes.xywh
-    
+        # Caixas
+        boxesxywh = res.xywh
+        boxesxyxy = res.xyxy
+        
         # Confiabilidade da previsão
         conf = result[0].boxes.conf
         i = torch.argmax(conf)       
 
         x,y,w,h = boxesxywh[i]
         
+        upperBorderX, upperBorderY, downBorderX, downBorderY = boxesxyxy[i]
+        upperBorderX, upperBorderY, downBorderX, downBorderY = map(int, [upperBorderX, upperBorderY, downBorderX, downBorderY])
+        
+        cv2.rectangle(img,(upperBorderX,upperBorderY), (downBorderX, downBorderY), (0,255,0),3)
+        
         if x >= bwRect1 and x <= ewRect1:
-            cv2.putText(processed_img, 'Frente', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
+            cv2.putText(img, 'Frente', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
             publish('F')
         elif x < bwRect1:
-            cv2.putText(processed_img, 'Direita', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
+            cv2.putText(img, 'Direita', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
             publish('D')
         elif x > ewRect1:
-            cv2.putText(processed_img, 'Esquerda', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
+            cv2.putText(img, 'Esquerda', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
             publish('E')
         else:
-            cv2.putText(processed_img, 'Parado', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
+            cv2.putText(img, 'Parado', (10,30), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (255,0,0), 1)
             publish('P')
         
     else:
-        #  publish('0 bola(s) encontrada(s)')
+         publish('0 bola(s) encontrada(s)')
          publish('P')
 
-    
-    cv2.rectangle(processed_img,(bwRect1,0),(ewRect1,height),(255,0,0),4)
-    return processed_img
+    # Retângulo que divide a tela em 3
+    cv2.rectangle(img,(bwRect1,0),(ewRect1,height),(255,0,0),4)
+    return img
 
 # Função para mostrar a camera do drone
 def mostraImagem():
@@ -110,9 +115,10 @@ def mostraImagem():
         if cv2.waitKey(1) & 0xff == 27:
             break
         
+        cv2.imshow('frame', frame)
         img = idYolo(frame)
-        cv2.imshow('frame', img)
-    
+        cv2.imshow('YOLO', img)
+
     cap.release()
     disconnect()
     cv2.destroyAllWindows()
