@@ -2,9 +2,9 @@
 import paho.mqtt.client as mqtt
 
 # Cria o cliente do MQTT
-client = mqtt.Client()
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-anterior = 0
+historico = 0
 atual = 1
 
 # Conexão do MQTT
@@ -16,7 +16,7 @@ def on_connect(client, userdata, flags, rc):
     disconnectMqtt = False
 
     # Publicando no tópico 
-    client.publish('aiurarecebe/anterior', 'MQTT conectado')
+    client.publish('aiurarecebe/historico', 'MQTT conectado')
     client.publish('aiurarecebe/atual', 'MQTT')
     
     client.subscribe("aiurarecebe/atual")
@@ -25,25 +25,22 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     print(f'Mensagem de ${msg.topic}: ${msg.payload.decode()}')
     
-    global anterior, atual 
-    print(f'Anterior:{anterior} e Atual:{atual}')
+    global historico, atual 
+    print(f'Anterior:{historico} e Atual:{atual}')
     
-    # if msg.topic =="aiurarecebe/atual":
-    #     atual = msg.payload.decode()
-    # elif 
     atual = msg.payload.decode()
         
-    if anterior != atual:
-        client.publish('aiurarecebe/anterior', 'mudanca:'+str(atual))
+    if historico != atual:
+        client.publish('aiurarecebe/historico', 'Mudanca:'+str(atual))
         print('é diferente')
-        anterior = atual
+        historico = atual
     else:
-        client.publish('aiurarecebe/anterior', 'permanece:'+str(atual))
+        client.publish('aiurarecebe/historico', 'Permanece:'+str(atual))
         print('é igual')
     
     
     
-    print(f'Anterior:{anterior} e Atual:{atual}')
+    print(f'Anterior:{historico} e Atual:{atual}')
   
 
 # Desconectar do broker
@@ -72,5 +69,5 @@ def main():
     client.loop_forever()       
 
 
-if _name_ == '_main_':
+if __name__ == '__main__':
     main()
