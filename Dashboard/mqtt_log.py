@@ -5,9 +5,6 @@ import time
 # Cria o cliente do MQTT
 client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
 
-historico = 0
-atual = 1
-
 caminho_log = "log.txt"
 log = None
 
@@ -20,36 +17,18 @@ def on_connect(client, userdata, flags, rc):
     disconnectMqtt = False
 
     # Publicando no tópico 
-    client.publish('aiurarecebe/historico', 'MQTT conectado')
-    client.publish('aiurarecebe/atual', 'MQTT')
-    
+    client.publish('aiurarecebe/atual', 'MQTT')    
     client.subscribe("aiurarecebe/atual")
 
 # Impressão da mensagem recebida pelo tópico 
 def on_message(client, userdata, msg):
     print(f'Mensagem de ${msg.topic}: ${msg.payload.decode()}')
-    
-    global historico, atual 
-    print(f'Anterior:{historico} e Atual:{atual}')
      
-    atual = msg.payload.decode()
-        
-    if historico != atual:
-        client.publish('aiurarecebe/historico', 'Mudanca:'+str(atual))
-        print('é diferente')
-        historico = atual
-    else:
-        client.publish('aiurarecebe/historico', 'Permanece:'+str(atual))
-        print('é igual')
-    
+    atual = msg.payload.decode()    
     
     with open(caminho_log,'a') as arquivo:
         nova_mensagem = f'{time.strftime("%d/%m/%y %H:%M:%S")}: {atual}'
         arquivo.write(nova_mensagem+'\n')
-    
-    
-    print(f'Anterior:{historico} e Atual:{atual}')
-  
 
 # Desconectar do broker
 def disconnect():
