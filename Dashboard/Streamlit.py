@@ -1,4 +1,3 @@
-from threading import Thread
 from streamlit_autorefresh import st_autorefresh
 import paho.mqtt.client as mqtt 
 import random
