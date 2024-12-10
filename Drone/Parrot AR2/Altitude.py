@@ -61,7 +61,7 @@ while True:
 
 	if cv2.waitKey(1) & 0xFF == ord('j'):
 		drone.move(down=0.4)
-		print('up') 
+		print('down') 
 
 	if cv2.waitKey(1) & 0xFF == 27:
 			break
