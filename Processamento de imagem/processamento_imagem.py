@@ -1,12 +1,19 @@
+from tello_zune import TelloZune
 from ultralytics import YOLO
 import numpy as np
 import cv2
 import torch
 import time
 
-model_esp = YOLO('Database/best.pt')
+# tello = TelloZune()
+# tello.start_tello()
 
-esp_cam = cv2.VideoCapture(0)
+model_esp = YOLO('Database/best.pt')
+model_drone = YOLO('Database/best.pt')
+
+drone_cam = cv2.VideoCapture(0)
+esp_cam = cv2.VideoCapture("http://10.6.3.68:81/stream")
+
 empty_array = np.array([])
 
 def id_yolo(img: np.ndarray, height: int, width: int, model: YOLO) -> np.ndarray:
@@ -99,25 +106,39 @@ def id_yolo(img: np.ndarray, height: int, width: int, model: YOLO) -> np.ndarray
 def main():
     # Inicia abrindo a camera da ESP32 para
     _, frame_esp = esp_cam.read()
-    cv2.imshow('Processamento de imagem', frame_esp)
+    cv2.imshow('Processamento de imagem - ESP32CAM', frame_esp)
     
+    _, frame_drone = drone_cam.read()
+    cv2.imshow('Processamento de imagem - Drone', frame_drone) 
         
     while True:
         ret, frame_esp = esp_cam.read()
+        ret, frame_drone = drone_cam.read() # tello.get_frame()
 
         height_esp, width_esp, _ = frame_esp.shape
+        height_drone, width_drone, _ = frame_drone.shape
 
+        identified_esp = False
+        
         if not ret:
             break
             
         imgYolo_esp = id_yolo(frame_esp, height_esp, width_esp, model_esp)
 
-        if not imgYolo_esp.size:
-            imgYolo_esp = frame_esp
+        if imgYolo_esp.size:
+            frame_esp = imgYolo_esp 
+            identified_esp = True
         
-        print(type(frame_esp))
-        cv2.imshow('Processamento de imagem', imgYolo_esp)
+        if not identified_esp:
+            imgYolo_drone = id_yolo(frame_drone, height_drone, width_drone, model_drone)
 
+            if imgYolo_drone.size:
+                frame_drone = imgYolo_drone
+        
+        cv2.imshow('Processamento de imagem - ESP32CAM', frame_esp)
+        cv2.imshow('Processamento de imagem - Drone', frame_drone)
+
+        
         if cv2.waitKey(1) & 0xFF == 27:
             break
 
