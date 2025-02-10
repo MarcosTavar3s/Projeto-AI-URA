@@ -141,9 +141,10 @@ class AiUra():
 
                         # Copia que sera colocada a bounding box
                         self.frame_drone_bb = self.frame_drone.copy()
-                                               
-                        for clse in self.cls_drone:
-                            print(clse.item())
+                          
+                        # DEBUG                     
+                        # for clse in self.cls_drone:
+                        #     print(clse.item())
                          
                         # Desenho da bounding box
                         for box in self.boxes_drone.xywh:
@@ -200,8 +201,8 @@ class AiUra():
         # Se inscrevendo no topico de escuta
         self.client.subscribe(self.mqtt_sub_topic)
         
-    def on_message(client, userdata, msg):
-        print(f'Mensagem de ${msg.topic}: ${msg.payload.decode()}')
+    def on_message(self, client, userdata, msg):
+        print(f'Mensagem de ${msg.topic}: {msg.payload.decode()}')
         
     def publish(self, msg):
         self.client.publish(self.mqtt_pub_topic, msg)
