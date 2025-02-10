@@ -102,6 +102,7 @@ class AiUra():
                 break
         
         self.visualizar = False
+        self.disconnect()
         cv2.destroyAllWindows()
         
     def processamento_imagem(self):       
@@ -186,6 +187,12 @@ class AiUra():
         self.client.connect(self.broker, 1883, 60)
         self.client.loop_forever()       
 
+    def disconnect(self):
+        print("Desconectando do broker...")
+        self.client.disconnect()
+        print("Broker finalizado")
+
+    
     def on_connect(self, client, userdata, flags, rc, properties):
         print(f"Conectado ao broker com código de resultado {rc}")
         self.client.publish(self.mqtt_pub_topic, "MQTT conectado com sucesso")
