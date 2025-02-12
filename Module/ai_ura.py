@@ -37,37 +37,42 @@ class AiUra():
         
         genai.configure(api_key=api_key)
         self.gemini_model = genai.GenerativeModel("gemini-1.5-flash", generation_config=generation_config)
-
         
         # Drone Tello
-        # self.tello = TelloZune()
+        self.tello = TelloZune()
         
         # Inicia o Tello
-        # self.tello.start_tello()
+        self.tello.start_tello()
         
         # Fila para visualizacao
         self.visualizar = True
         
         self.frame_esp_cam = None
-        self.queue = Queue()
+        self.frame_drone = None
+        self.queue_esp = Queue()
+        self.queue_drone = Queue()
+        
+        empty_frame = np.zeros((480,640,3), dtype=np.uint8)
+        
+        # Inicializacao dos frames
+        cv2.imshow("Drone", empty_frame)
+        cv2.imshow("ESP32CAM",empty_frame)
         
         # Serie de movimentos que o carrinho tem que realizar para atingir a bolinha conforme a visao do drone
         self.serie_de_movimentos = ""
-        
-        
+                
         # Inicializacao da variavel que vai servir para o processamento do YOLO a cada 2 segundos
         self.tempo_inicial = time.time()
-        
+                
         # Threads de processamento e captura de imagem
         self.thread_processamento = threading.Thread(target=self.processamento_imagem, daemon=True)
         self.thread_captura = threading.Thread(target=self.captura_imagens, daemon=True)
-        self.thread_mqtt = threading.Thread(target=self.mqtt, daemon=True)
+        # self.thread_mqtt = threading.Thread(target=self.mqtt, daemon=True)
         
         # Inicio das threads
         self.thread_processamento.start()
         self.thread_captura.start()
-        self.thread_mqtt.start()
-        
+        # self.thread_mqtt.start()
         
     def captura_imagens(self):
         while self.visualizar:
@@ -76,32 +81,36 @@ class AiUra():
             ret_esp_cam, frame_esp_cam = self.cap_esp_cam.read()
             
             # Coleta a imagem do drone
-            # self.frame_drone = self.tello.get_frame()
-            self.frame_drone = cv2.imread('img teste/duas_caixas_reto.png')
-            
+            self.queue_drone.put(self.tello.get_frame())
             
             if not ret_esp_cam:
                 print("Erro na abertura da ESP32CAM")
                 break
             else:
-                self.queue.put(frame_esp_cam)
+                self.queue_esp.put(frame_esp_cam)
             
-            if not self.queue.empty():
-                self.frame_esp_cam = self.queue.get()
+            if not self.queue_esp.empty():
+                self.frame_esp_cam = self.queue_esp.get()            
             
+            if not self.queue_drone.empty():
+                self.frame_drone = self.queue_drone.get()
+                    
         self.cap_esp_cam.release()
              
     def mostrar_imagens(self):
         while self.visualizar:
-            
+            if self.frame_drone is not None:            
+                cv2.imshow("Drone", self.frame_drone)
+
             if self.frame_esp_cam is not None:
                 cv2.imshow("ESP32CAM", self.frame_esp_cam)
-                cv2.imshow("Drone", self.frame_drone)
+            
                 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         
         self.visualizar = False
+        self.tello.end_tello()
         self.disconnect()
         cv2.destroyAllWindows()
         
@@ -167,7 +176,8 @@ class AiUra():
             self.serie_de_movimentos += response.text
                 
             self.serie_de_movimentos = re.findall(r'[FEDT]\d{1}', self.serie_de_movimentos)
-            # DEBUG: print(self.serie_de_movimentos)
+            # DEBUG: 
+            print(self.serie_de_movimentos)
             
             msg = ""
             
@@ -193,7 +203,6 @@ class AiUra():
         self.client.disconnect()
         print("Broker finalizado")
 
-    
     def on_connect(self, client, userdata, flags, rc, properties):
         print(f"Conectado ao broker com código de resultado {rc}")
         self.client.publish(self.mqtt_pub_topic, "MQTT conectado com sucesso")
