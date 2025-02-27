@@ -4,12 +4,13 @@ import os
 
 # O codigo faz a leitura de uma imagem e salva a imagem com grades de hexagonos regulares
 def main():
-    path = input("Coloque o caminho da imagem aqui: ")
+    # path = input("Coloque o caminho da imagem aqui: ")
+    path = "img teste/screen.png"
     img = cv2.imread(path)
     height, width, _ = img.shape
               
     # definicao do tamanho dos lados do hexagono
-    x = 10 # para a primeira linha nao violar a condicao de ser um poligono regular 
+    x = 20 # para a primeira linha nao violar a condicao de ser um poligono regular 
     l = x*(2**(1/2)) # pela condicao inicial de ser regular, o lado tera esse comprimento
     
     # cor da grade em bgr
@@ -18,13 +19,18 @@ def main():
     # fecha o poligono
     isClosed = True
     
-    for i in range(int(width//l)):    
-        # coordenada dos pontos para fazer o hexagono (nao alterar)
-        pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], np.int32)
-        pts = pts.reshape((-1, 1, 2))        
+    for j in range(int(height//l)):
+        for i in range(int(width//l)):    
+            # coordenada dos pontos para fazer o hexagono (nao alterar)
+            if not (i%2):
+                pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], dtype=np.int32)
+            
+            # pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], np.int32)
+            
+            pts = pts.reshape((-1, 1, 2))        
+            
+            cv2.polylines(img, [pts], isClosed, grade_cor, 2)
         
-        cv2.polylines(img, [pts], isClosed, grade_cor, 2)
-    
     while True:
         cv2.imshow("Imagem com grades hexagonais", img)
         
