@@ -5,7 +5,7 @@ import os
 # O codigo faz a leitura de uma imagem e salva a imagem com grades de hexagonos regulares
 def main():
     # path = input("Coloque o caminho da imagem aqui: ")
-    path = "img teste/screen.png"
+    path = "Imagens - Teste/teste_bola.jpg"
     img = cv2.imread(path)
     height, width, _ = img.shape
               
@@ -22,14 +22,12 @@ def main():
     for j in range(int(height//l)):
         for i in range(int(width//l)):    
             # coordenada dos pontos para fazer o hexagono (nao alterar)
-            if not (i%2):
-                pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], dtype=np.int32)
+            pts = np.array([[x*2*i, x + 2*j*(x+l)], [x*2*i, x + l + 2*j*(x+l)], [x + x*2*i, 2*x + l + 2*j*(x+l)], [2*x + x*2*i, x + l + 2*j*(x+l)], [2*x + x*2*i, x + 2*j*(x+l)], [x + x*2*i, 2*j*(x+l)]], dtype=np.int32)
             
             # pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], np.int32)
-            
             pts = pts.reshape((-1, 1, 2))        
-            
             cv2.polylines(img, [pts], isClosed, grade_cor, 2)
+            
         
     while True:
         cv2.imshow("Imagem com grades hexagonais", img)
