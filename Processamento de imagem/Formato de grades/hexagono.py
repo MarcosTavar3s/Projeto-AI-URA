@@ -27,6 +27,7 @@ def main():
             # pts = np.array([[x*2*i, x], [x*2*i, x+l], [x + x*2*i, 2*x+l], [2*x + x*2*i, x+l], [2*x + x*2*i, x], [x + x*2*i, 0]], np.int32)
             pts = pts.reshape((-1, 1, 2))        
             cv2.polylines(img, [pts], isClosed, grade_cor, 2)
+            cv2.rectangle(img, (x + x*2*i,  int(2*x + l + 2*j*(x+l))), (x + x*2*i, int(2*(x+l) + 2*j*(x+l)) ), (0, 0, 255), 2)
             
         
     while True:
