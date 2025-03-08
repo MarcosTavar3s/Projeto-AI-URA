@@ -32,7 +32,6 @@ def main():
             else:
                 cv2.putText(img, str(contador), (2*x + x*2*i -10 ,int(x + l/2 + j*(x+l))), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.7, (255,0,0), 1)
                
-            print(contador)
             # coordenada dos pontos para fazer o hexagono (nao alterar)
             pts = np.array([[x*2*i, x + 2*j*(x+l)], [x*2*i, x + l + 2*j*(x+l)], [x + x*2*i, 2*x + l + 2*j*(x+l)], [2*x + x*2*i, x + l + 2*j*(x+l)], [2*x + x*2*i, x + 2*j*(x+l)], [x + x*2*i, 2*j*(x+l)]], dtype=np.int32)
             
